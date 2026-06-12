@@ -150,12 +150,78 @@
   }
   .hidden { display:none !important; }
 
-  @media (max-width:620px) {
+  /* ── MOBILE (≤ 480px) ── */
+  @media (max-width:480px) {
+    /* Prevent page-level horizontal scroll from wide tables */
+    .board { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+    /* Tighter wrap padding */
+    .wrap { padding:0 12px; }
+
+    /* Header */
+    .tagline { font-size:10px; letter-spacing:0.08em; }
+
+    /* Tabs — full width, equal split */
+    .tabs { gap:1px; }
+    .tabs button { flex:1; padding:11px 10px; font-size:12px; letter-spacing:0.06em; }
+
+    /* Controls — stack vertically */
+    .controls { flex-direction:column; align-items:stretch; gap:8px; margin:16px 0 12px; }
+    .seg { width:100%; }
+    .seg button { flex:1; padding:11px 8px; font-size:12px; }
+    .search { min-width:0; width:100%; font-size:14px; padding:11px 12px; }
+    .count { text-align:center; }
+
+    /* Table cells — tighter, prevent overflow */
+    tbody td, thead th { padding:9px 8px; white-space:nowrap; }
+    .pname { font-size:13px; }
+    .frags { font-size:14px; }
+    .rank { font-size:11px; width:36px; }
+    .tag { font-size:8px; padding:1px 4px; margin-left:4px; }
+
+    /* Hide secondary columns on mobile */
+    .hide-sm { display:none; }
+
+    /* Map header — stack name above meta, both left-aligned */
+    .map-head { flex-direction:column; align-items:flex-start; padding:14px 12px; gap:6px; }
+    .map-name { font-size:20px; }
+    .map-name .mid { display:block; margin-left:0; margin-top:4px; }
+    .map-meta { text-align:left; font-size:11px; }
+
+    /* Nav — tighter buttons, ensure touch targets ≥ 44px tall */
+    .nav { margin:12px 0 24px; gap:8px; }
+    .nav button { padding:12px 14px; font-size:12px; min-height:44px; }
+    .nav-end { padding:12px 10px !important; font-size:11px !important; min-height:44px; }
+    .nav .pos { font-size:10px; }
+
+    /* Map list — hide 2nd and 3rd place on very small screens */
+    .hide-sm { display:none; }
+
+    /* Map list cells */
+    .mapcell { font-size:13px; }
+    .timecell { font-size:10px; white-space:nowrap; }
+    .place { font-size:13px; }
+    .place .pf { font-size:10px; }
+
+    /* Footer */
+    footer { flex-direction:column; gap:4px; font-size:10px; padding:14px 0 28px; }
+  }
+
+  /* ── SMALL MOBILE (≤ 360px) ── */
+  @media (max-width:360px) {
+    .tabs button { font-size:11px; padding:10px 6px; }
+    .nav button { padding:11px 10px; font-size:11px; }
+    .map-name { font-size:17px; }
+  }
+
+  /* ── MEDIUM (481px – 620px) ── */
+  @media (min-width:481px) and (max-width:620px) {
     .hide-sm { display:none; }
     tbody td, thead th { padding:10px 9px; }
     .pname { font-size:14px; }
     .tabs button { padding:11px 16px; font-size:13px; }
     .map-name { font-size:22px; }
+    .board { overflow-x:auto; -webkit-overflow-scrolling:touch; }
   }
 </style>
 </head>
