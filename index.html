@@ -428,7 +428,6 @@ function renderMapDetail(){
     const nm=nameOf(pp.player_id);
     let tag="";
     if(pp.special==="B") tag='<span class="tag bot">bot</span>';
-    else if(pp.special==="+") tag='<span class="tag recon">+</span>';
     const elo=eloOf(pp.player_id);
     const eloStr=elo===null?"—":elo;
     return `<tr>
