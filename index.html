@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q2 LEAGUES — Stats</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --bg:#0d0c0a; --panel:#16140f; --panel-2:#1d1a13;
+    --rust:#c0552b; --rust-dim:#8a3d1f; --amber:#e8a33d;
+    --steel:#6b7480; --steel-lt:#9aa3ad; --text:#d8d2c4; --text-dim:#8a8475;
+    --line:#2a261d; --bot:#5a6470; --gold:#e8a33d; --silver:#b8bcc2; --bronze:#bd7a48;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:'Oswald',sans-serif; font-weight:300; letter-spacing:0.02em;
+    min-height:100vh;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.18) 3px),
+      radial-gradient(ellipse at top, #1a1712 0%, var(--bg) 70%);
+  }
+  .wrap { max-width:1100px; margin:0 auto; padding:0 20px; }
+
+  header {
+    border-bottom:2px solid var(--rust);
+    background:linear-gradient(180deg, var(--panel) 0%, transparent 100%);
+    padding:32px 0 0; position:relative;
+  }
+  .brand {
+    font-size:clamp(32px,5.5vw,54px); font-weight:700; line-height:0.92;
+    text-transform:uppercase; letter-spacing:0.04em; color:var(--text);
+  }
+  .brand span { color:var(--rust); }
+  .tagline {
+    font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--text-dim);
+    margin-top:8px; letter-spacing:0.15em; text-transform:uppercase;
+  }
+  .tabs { display:flex; gap:2px; margin-top:24px; }
+  .tabs button {
+    background:var(--panel); border:1px solid var(--line); border-bottom:none;
+    color:var(--text-dim); font-family:'Oswald',sans-serif; font-weight:600;
+    font-size:15px; text-transform:uppercase; letter-spacing:0.1em;
+    padding:12px 26px; cursor:pointer; transition:all 0.15s; position:relative; top:1px;
+  }
+  .tabs button:hover { color:var(--text); }
+  .tabs button.active { background:var(--bg); color:var(--amber); border-bottom:2px solid var(--bg); }
+  .tabs button.active::before {
+    content:""; position:absolute; top:-1px; left:-1px; right:-1px; height:2px; background:var(--rust);
+  }
+
+  .controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:26px 0 18px; }
+  .seg { display:inline-flex; border:1px solid var(--line); background:var(--panel); }
+  .seg button {
+    background:none; border:none; color:var(--text-dim);
+    font-family:'Oswald',sans-serif; font-weight:500; font-size:13px;
+    text-transform:uppercase; letter-spacing:0.08em; padding:9px 16px; cursor:pointer; transition:all 0.15s;
+  }
+  .seg button:hover { color:var(--text); background:var(--panel-2); }
+  .seg button.active { background:var(--rust); color:#fff; }
+  .search {
+    flex:1; min-width:180px; background:var(--panel); border:1px solid var(--line);
+    color:var(--text); font-family:'Share Tech Mono',monospace; font-size:13px; padding:9px 14px;
+  }
+  .search::placeholder { color:var(--text-dim); }
+  .search:focus { outline:none; border-color:var(--rust-dim); }
+  .count { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--text-dim); letter-spacing:0.1em; }
+
+  .board { border:1px solid var(--line); background:var(--panel); margin-bottom:30px; }
+  table { width:100%; border-collapse:collapse; }
+  thead th {
+    font-family:'Share Tech Mono',monospace; font-size:11px; font-weight:400;
+    text-transform:uppercase; letter-spacing:0.12em; color:var(--steel-lt);
+    text-align:right; padding:13px 14px; border-bottom:1px solid var(--rust-dim);
+    background:var(--panel-2); cursor:pointer; user-select:none; white-space:nowrap;
+  }
+  thead th:first-child, thead th.lft { text-align:left; }
+  thead th:hover { color:var(--amber); }
+  thead th.nosort { cursor:default; } thead th.nosort:hover { color:var(--steel-lt); }
+  thead th .arr { color:var(--rust); margin-left:4px; }
+  tbody td {
+    padding:11px 14px; text-align:right; border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums; font-weight:400; font-size:15px;
+  }
+  tbody td:first-child, tbody td.lft { text-align:left; }
+  tbody tr:hover { background:var(--panel-2); }
+  .rank { font-family:'Share Tech Mono',monospace; font-size:13px; color:var(--text-dim); width:54px; }
+  .rank.top { color:var(--amber); }
+  .pname { font-weight:500; font-size:16px; letter-spacing:0.01em; }
+  .tag {
+    display:inline-block; font-family:'Share Tech Mono',monospace; font-size:9px; font-weight:400;
+    padding:2px 6px; margin-left:8px; text-transform:uppercase; letter-spacing:0.1em;
+    vertical-align:middle; border:1px solid;
+  }
+  .tag.bot { color:var(--bot); border-color:var(--bot); }
+  .tag.recon { color:var(--amber); border-color:var(--rust-dim); }
+  .frags { color:var(--amber); font-weight:600; font-size:16px; }
+  .elo { font-family:'Share Tech Mono',monospace; color:var(--steel-lt); }
+  .ratio-pos { color:#7faf6b; } .ratio-neg { color:var(--rust); }
+
+  .loading, .empty {
+    padding:60px 20px; text-align:center; font-family:'Share Tech Mono',monospace;
+    color:var(--text-dim); letter-spacing:0.1em; text-transform:uppercase; font-size:13px;
+  }
+  .blink { animation:blink 1.1s steps(2) infinite; }
+  @keyframes blink { 0%,50%{opacity:1;} 50.01%,100%{opacity:0.2;} }
+
+  .map-head {
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap;
+    gap:12px; padding:20px; border:1px solid var(--line); border-bottom:none; background:var(--panel-2);
+  }
+  .map-name { font-size:30px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color:var(--text); }
+  .map-name .mid { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--rust); margin-left:10px; vertical-align:middle; }
+  .map-meta { font-family:'Share Tech Mono',monospace; font-size:13px; color:var(--text-dim); letter-spacing:0.08em; text-align:right; }
+  .map-meta .dt { color:var(--amber); }
+
+  .nav { display:flex; justify-content:space-between; align-items:center; gap:14px; margin:18px 0 40px; }
+  .nav button {
+    background:var(--panel); border:1px solid var(--line); color:var(--text);
+    font-family:'Oswald',sans-serif; font-weight:500; font-size:14px; text-transform:uppercase;
+    letter-spacing:0.08em; padding:11px 22px; cursor:pointer; transition:all 0.15s;
+    display:flex; align-items:center; gap:8px;
+  }
+  .nav button:hover:not(:disabled) { background:var(--rust); color:#fff; border-color:var(--rust); }
+  .nav button:disabled { opacity:0.3; cursor:not-allowed; }
+  .nav .pos { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--text-dim); letter-spacing:0.1em; }
+  .nav-end {
+    padding:8px 14px !important; font-size:12px !important;
+    background:var(--panel-2) !important; color:var(--text-dim) !important;
+    border-color:var(--line) !important;
+  }
+  .nav-end:hover:not(:disabled) { background:var(--rust-dim) !important; color:#fff !important; border-color:var(--rust-dim) !important; }
+
+  .maplist-row { cursor:pointer; }
+  .maplist-row:hover { background:var(--panel-2); }
+  .place { font-weight:500; }
+  .place .pf { font-family:'Share Tech Mono',monospace; font-size:12px; margin-left:6px; }
+  .p1 { color:var(--gold); } .p1 .pf { color:var(--amber); }
+  .p2 { color:var(--silver); } .p2 .pf { color:var(--steel-lt); }
+  .p3 { color:var(--bronze); } .p3 .pf { color:var(--rust-dim); }
+  .mapcell { font-weight:600; font-size:16px; color:var(--text); }
+  .timecell { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--text-dim); }
+
+  footer {
+    border-top:1px solid var(--line); padding:20px 0 40px; font-family:'Share Tech Mono',monospace;
+    font-size:11px; color:var(--text-dim); letter-spacing:0.08em;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  .hidden { display:none !important; }
+
+  @media (max-width:620px) {
+    .hide-sm { display:none; }
+    tbody td, thead th { padding:10px 9px; }
+    .pname { font-size:14px; }
+    .tabs button { padding:11px 16px; font-size:13px; }
+    .map-name { font-size:22px; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1 class="brand">Q2&nbsp;<span>LEAGUES</span></h1>
+      <div class="tagline">// Quake II Remastered · Dedicated Server Stats</div>
+      <div class="tabs" id="maintabs">
+        <button data-tab="rankings" class="active">Rankings</button>
+        <button data-tab="maps">Maps</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <section id="tab-rankings">
+      <div class="controls">
+        <div class="seg" id="filter">
+          <button data-f="all" class="active">All</button>
+          <button data-f="humans">Humans</button>
+          <button data-f="bots">Bots</button>
+        </div>
+        <input class="search" id="search" type="text" placeholder="search player...">
+        <span class="count" id="count"></span>
+      </div>
+      <div class="board">
+        <table>
+          <thead>
+            <tr>
+              <th class="lft nosort" style="width:54px">#</th>
+              <th class="lft" data-sort="name">Player</th>
+              <th data-sort="total_frags">Frags</th>
+              <th data-sort="total_frags_against" class="hide-sm">Deaths</th>
+              <th data-sort="ratio" class="hide-sm">K/D</th>
+              <th data-sort="total_self_kills" class="hide-sm">Self</th>
+              <th data-sort="maps_played" class="hide-sm">Maps</th>
+              <th data-sort="elo">Elo</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="8" class="loading"><span class="blink">▌ loading data</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-maps" class="hidden">
+      <div class="controls">
+        <div class="seg" id="subtabs">
+          <button data-sub="detail" class="active">Map Detail</button>
+          <button data-sub="list">Map List</button>
+        </div>
+      </div>
+
+      <div id="sub-detail">
+        <div class="nav" style="margin-bottom:0;">
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button id="md-first" class="nav-end">◀◀</button>
+            <button id="md-prev">◀ Prev</button>
+          </div>
+          <span class="pos" id="md-pos"></span>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button id="md-next">Next ▶</button>
+            <button id="md-last" class="nav-end">▶▶</button>
+          </div>
+        </div>
+        <div class="map-head">
+          <div class="map-name" id="md-name">—</div>
+          <div class="map-meta" id="md-meta"></div>
+        </div>
+        <div class="board" style="margin-bottom:40px">
+          <table>
+            <thead>
+              <tr>
+                <th class="lft nosort" style="width:54px">#</th>
+                <th class="lft nosort">Player</th>
+                <th class="nosort">Frags</th>
+                <th class="nosort hide-sm">Against</th>
+                <th class="nosort">Elo Before</th>
+                <th class="nosort">Elo After</th>
+              </tr>
+            </thead>
+            <tbody id="md-rows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="sub-list" class="hidden">
+        <div class="board">
+          <table>
+            <thead>
+              <tr>
+                <th class="lft nosort">Map</th>
+                <th class="lft nosort">Started</th>
+                <th class="lft nosort">1st</th>
+                <th class="lft nosort hide-sm">2nd</th>
+                <th class="lft nosort hide-sm">3rd</th>
+              </tr>
+            </thead>
+            <tbody id="ml-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>DATA · live from q2-leagues pipeline</span>
+      <span id="updated"></span>
+    </footer>
+  </div>
+
+<script>
+const BASE = "https://raw.githubusercontent.com/daniellazaroff-lab/q2-leagues-data/main/";
+
+let players = [], maps = [];
+let playerById = {};
+let curMap = 0;
+let rFilter = "all", rSort = "total_frags", rDir = -1, rQuery = "";
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function ratio(p){ if(p.total_frags_against===0) return p.total_frags>0?p.total_frags:0; return p.total_frags/p.total_frags_against; }
+function nameOf(id){ const p=playerById[id]; return p?p.name:("#"+id); }
+function eloOf(id){ const p=playerById[id]; return p?p.elo:null; }
+
+document.getElementById("maintabs").addEventListener("click", e=>{
+  if(e.target.tagName!=="BUTTON") return;
+  const t=e.target.dataset.tab;
+  document.querySelectorAll("#maintabs button").forEach(b=>b.classList.remove("active"));
+  e.target.classList.add("active");
+  document.getElementById("tab-rankings").classList.toggle("hidden", t!=="rankings");
+  document.getElementById("tab-maps").classList.toggle("hidden", t!=="maps");
+});
+
+document.getElementById("subtabs").addEventListener("click", e=>{
+  if(e.target.tagName!=="BUTTON") return;
+  const s=e.target.dataset.sub;
+  document.querySelectorAll("#subtabs button").forEach(b=>b.classList.remove("active"));
+  e.target.classList.add("active");
+  document.getElementById("sub-detail").classList.toggle("hidden", s!=="detail");
+  document.getElementById("sub-list").classList.toggle("hidden", s!=="list");
+});
+
+function passesFilter(p){
+  if(p.special==="E") return false;
+  if(p.maps_played===0 && p.total_frags===0) return false;
+  if(rFilter==="humans" && p.is_bot) return false;
+  if(rFilter==="bots" && !p.is_bot) return false;
+  if(rQuery && !p.name.toLowerCase().includes(rQuery)) return false;
+  return true;
+}
+function renderRankings(){
+  const tbody=document.getElementById("rows");
+  let list=players.filter(passesFilter);
+  list.sort((a,b)=>{
+    let av,bv;
+    if(rSort==="ratio"){av=ratio(a);bv=ratio(b);}
+    else if(rSort==="name"){av=a.name.toLowerCase();bv=b.name.toLowerCase();}
+    else {av=a[rSort];bv=b[rSort];}
+    if(av<bv) return -rDir; if(av>bv) return rDir; return 0;
+  });
+  document.getElementById("count").textContent=list.length+" player"+(list.length===1?"":"s");
+  if(!list.length){ tbody.innerHTML='<tr><td colspan="8" class="empty">no players match</td></tr>'; return; }
+  tbody.innerHTML=list.map((p,i)=>{
+    const r=ratio(p), rCls=r>=1?"ratio-pos":"ratio-neg";
+    const tag=p.special==="B"?'<span class="tag bot">bot</span>':"";
+    return `<tr>
+      <td class="${i<3?'rank top':'rank'}">${String(i+1).padStart(2,'0')}</td>
+      <td class="lft"><span class="pname">${escapeHtml(p.name)}</span>${tag}</td>
+      <td class="frags">${p.total_frags}</td>
+      <td class="hide-sm">${p.total_frags_against}</td>
+      <td class="hide-sm ${rCls}">${r.toFixed(2)}</td>
+      <td class="hide-sm">${p.total_self_kills}</td>
+      <td class="hide-sm">${p.maps_played}</td>
+      <td class="elo">${p.elo===null?"—":p.elo}</td>
+    </tr>`;
+  }).join("");
+}
+document.getElementById("filter").addEventListener("click",e=>{
+  if(e.target.tagName!=="BUTTON")return;
+  rFilter=e.target.dataset.f;
+  document.querySelectorAll("#filter button").forEach(b=>b.classList.remove("active"));
+  e.target.classList.add("active"); renderRankings();
+});
+document.getElementById("search").addEventListener("input",e=>{ rQuery=e.target.value.toLowerCase().trim(); renderRankings(); });
+document.querySelectorAll("#tab-rankings th[data-sort]").forEach(th=>{
+  th.addEventListener("click",()=>{
+    const k=th.dataset.sort;
+    if(rSort===k) rDir*=-1; else { rSort=k; rDir=(k==="name")?1:-1; }
+    document.querySelectorAll("#tab-rankings th .arr").forEach(a=>a.remove());
+    const arr=document.createElement("span"); arr.className="arr"; arr.textContent=rDir===-1?"▼":"▲"; th.appendChild(arr);
+    renderRankings();
+  });
+});
+
+function renderMapDetail(){
+  if(!maps.length) return;
+  const m=maps[curMap];
+  document.getElementById("md-name").innerHTML = escapeHtml(m.name)+`<span class="mid">MAP #${m.id}</span>`;
+  document.getElementById("md-meta").innerHTML = `<span class="dt">${m.date}</span> · ${m.time_start} → ${m.time_end}`;
+  const pl=[...m.players].sort((a,b)=>b.frags-a.frags);
+  document.getElementById("md-rows").innerHTML = pl.map((pp,i)=>{
+    const nm=nameOf(pp.player_id);
+    let tag="";
+    if(pp.special==="B") tag='<span class="tag bot">bot</span>';
+    else if(pp.special==="+") tag='<span class="tag recon">+</span>';
+    const elo=eloOf(pp.player_id);
+    const eloStr=elo===null?"—":elo;
+    return `<tr>
+      <td class="${i<3?'rank top':'rank'}">${String(i+1).padStart(2,'0')}</td>
+      <td class="lft"><span class="pname">${escapeHtml(nm)}</span>${tag}</td>
+      <td class="frags">${pp.frags}</td>
+      <td class="hide-sm">${pp.frags_against}</td>
+      <td class="elo">${eloStr}</td>
+      <td class="elo">${eloStr}</td>
+    </tr>`;
+  }).join("");
+  const pos = `MAP ${curMap+1} OF ${maps.length}`;
+  document.getElementById("md-pos").textContent = pos;
+  const atFirst = curMap===0, atLast = curMap===maps.length-1;
+  document.getElementById("md-prev").disabled = atFirst;
+  document.getElementById("md-first").disabled = atFirst;
+  document.getElementById("md-next").disabled = atLast;
+  document.getElementById("md-last").disabled = atLast;
+}
+document.getElementById("md-prev").addEventListener("click",()=>{ if(curMap>0){curMap--;renderMapDetail();} });
+document.getElementById("md-next").addEventListener("click",()=>{ if(curMap<maps.length-1){curMap++;renderMapDetail();} });
+document.getElementById("md-first").addEventListener("click",()=>{ curMap=0; renderMapDetail(); });
+document.getElementById("md-last").addEventListener("click",()=>{ curMap=maps.length-1; renderMapDetail(); });
+
+function placeCell(m, idx, cls){
+  const pl=[...m.players].sort((a,b)=>b.frags-a.frags);
+  if(idx>=pl.length) return '<td class="lft">—</td>';
+  const pp=pl[idx];
+  return `<td class="lft place ${cls}">${escapeHtml(nameOf(pp.player_id))}<span class="pf">${pp.frags}</span></td>`;
+}
+function renderMapList(){
+  const ordered=[...maps].reverse();
+  document.getElementById("ml-rows").innerHTML = ordered.map(m=>{
+    const realIdx = maps.indexOf(m);
+    return `<tr class="maplist-row" data-idx="${realIdx}">
+      <td class="lft mapcell">${escapeHtml(m.name)}</td>
+      <td class="lft timecell">${m.date} ${m.time_start}</td>
+      ${placeCell(m,0,'p1')}
+      ${placeCell(m,1,'p2')}
+      ${placeCell(m,2,'p3')}
+    </tr>`;
+  }).join("");
+  document.querySelectorAll(".maplist-row").forEach(row=>{
+    row.addEventListener("click",()=>{
+      curMap=parseInt(row.dataset.idx,10);
+      document.querySelectorAll("#subtabs button").forEach(b=>b.classList.remove("active"));
+      document.querySelector('#subtabs button[data-sub="detail"]').classList.add("active");
+      document.getElementById("sub-detail").classList.remove("hidden");
+      document.getElementById("sub-list").classList.add("hidden");
+      renderMapDetail();
+    });
+  });
+}
+
+Promise.all([
+  fetch(BASE+"players.json").then(r=>{if(!r.ok)throw new Error("players "+r.status);return r.json();}),
+  fetch(BASE+"maps.json").then(r=>{if(!r.ok)throw new Error("maps "+r.status);return r.json();})
+]).then(([pdata,mdata])=>{
+  players=pdata; maps=mdata;
+  playerById={}; players.forEach(p=>playerById[p.id]=p);
+  curMap=maps.length-1;
+  renderRankings();
+  renderMapDetail();
+  renderMapList();
+  document.getElementById("updated").textContent="loaded "+new Date().toLocaleString();
+}).catch(err=>{
+  document.getElementById("rows").innerHTML='<tr><td colspan="8" class="empty">failed to load — '+err.message+'</td></tr>';
+});
+</script>
+</body>
+</html>
