@@ -29,14 +29,36 @@
     background:linear-gradient(180deg, var(--panel) 0%, transparent 100%);
     padding:32px 0 0; position:relative;
   }
+  .header-top {
+    display:flex; justify-content:space-between; align-items:flex-start;
+  }
+  .header-right {
+    text-align:right; font-family:'Share Tech Mono',monospace;
+    display:flex; flex-direction:column; align-items:flex-end; gap:6px;
+  }
+  .last-update {
+    font-size:11px; color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase;
+  }
+  .last-update span { color:var(--amber); }
+  .server-status {
+    display:flex; align-items:center; gap:8px;
+    font-size:11px; color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase;
+  }
+  .status-dot {
+    width:10px; height:10px; border-radius:50%; background:var(--steel);
+    flex-shrink:0; transition:background 0.4s;
+  }
+  .status-dot.online  { background:#7faf6b; box-shadow:0 0 6px #7faf6b88; animation:pulse 2.5s ease-in-out infinite; }
+  .status-dot.offline { background:var(--rust); box-shadow:0 0 6px var(--rust-dim); }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.55;} }
   .brand {
-    font-size:clamp(32px,5.5vw,54px); font-weight:700; line-height:0.92;
+    font-size:clamp(38px,6.5vw,64px); font-weight:700; line-height:0.92;
     text-transform:uppercase; letter-spacing:0.04em; color:var(--text);
   }
   .brand span { color:var(--rust); }
   .tagline {
     font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--text-dim);
-    margin-top:8px; letter-spacing:0.15em; text-transform:uppercase;
+    margin-top:14px; letter-spacing:0.15em; text-transform:uppercase;
   }
   .tabs { display:flex; gap:2px; margin-top:24px; }
   .tabs button {
@@ -152,69 +174,44 @@
 
   /* ── MOBILE (≤ 480px) ── */
   @media (max-width:480px) {
-    /* Prevent page-level horizontal scroll from wide tables */
     .board { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-
-    /* Tighter wrap padding */
     .wrap { padding:0 12px; }
-
-    /* Header */
     .tagline { font-size:10px; letter-spacing:0.08em; }
-
-    /* Tabs — full width, equal split */
+    .header-right { gap:4px; }
+    .last-update, .server-status { font-size:9px; }
+    .status-dot { width:8px; height:8px; }
     .tabs { gap:1px; }
     .tabs button { flex:1; padding:11px 10px; font-size:12px; letter-spacing:0.06em; }
-
-    /* Controls — stack vertically */
     .controls { flex-direction:column; align-items:stretch; gap:8px; margin:16px 0 12px; }
     .seg { width:100%; }
     .seg button { flex:1; padding:11px 8px; font-size:12px; }
     .search { min-width:0; width:100%; font-size:14px; padding:11px 12px; }
     .count { text-align:center; }
-
-    /* Table cells — tighter, prevent overflow */
     tbody td, thead th { padding:9px 8px; white-space:nowrap; }
     .pname { font-size:13px; }
     .frags { font-size:14px; }
     .rank { font-size:11px; width:36px; }
     .tag { font-size:8px; padding:1px 4px; margin-left:4px; }
-
-    /* Hide secondary columns on mobile */
     .hide-sm { display:none; }
-
-    /* Map header — stack name above meta, both left-aligned */
     .map-head { flex-direction:column; align-items:flex-start; padding:14px 12px; gap:6px; }
     .map-name { font-size:20px; }
     .map-name .mid { display:block; margin-left:0; margin-top:4px; }
     .map-meta { text-align:left; font-size:11px; }
-
-    /* Nav — tighter buttons, ensure touch targets ≥ 44px tall */
     .nav { margin:12px 0 24px; gap:8px; }
     .nav button { padding:12px 14px; font-size:12px; min-height:44px; }
     .nav-end { padding:12px 10px !important; font-size:11px !important; min-height:44px; }
     .nav .pos { font-size:10px; }
-
-    /* Map list — hide 2nd and 3rd place on very small screens */
-    .hide-sm { display:none; }
-
-    /* Map list cells */
     .mapcell { font-size:13px; }
     .timecell { font-size:10px; white-space:nowrap; }
     .place { font-size:13px; }
     .place .pf { font-size:10px; }
-
-    /* Footer */
     footer { flex-direction:column; gap:4px; font-size:10px; padding:14px 0 28px; }
   }
-
-  /* ── SMALL MOBILE (≤ 360px) ── */
   @media (max-width:360px) {
     .tabs button { font-size:11px; padding:10px 6px; }
     .nav button { padding:11px 10px; font-size:11px; }
     .map-name { font-size:17px; }
   }
-
-  /* ── MEDIUM (481px – 620px) ── */
   @media (min-width:481px) and (max-width:620px) {
     .hide-sm { display:none; }
     tbody td, thead th { padding:10px 9px; }
@@ -228,8 +225,19 @@
 <body>
   <header>
     <div class="wrap">
-      <h1 class="brand">Q2&nbsp;<span>LEAGUES</span></h1>
-      <div class="tagline">// Quake II Remastered · Dedicated Server Stats</div>
+      <div class="header-top">
+        <div>
+          <h1 class="brand">Q2&nbsp;<span>LEAGUES</span></h1>
+          <div class="tagline">// Quake II Remastered · Dedicated Server Stats</div>
+        </div>
+        <div class="header-right">
+          <div class="last-update">Last update&nbsp;<span id="last-update">—</span></div>
+          <div class="server-status">
+            <span id="status-label">checking</span>
+            <span class="status-dot" id="status-dot"></span>
+          </div>
+        </div>
+      </div>
       <div class="tabs" id="maintabs">
         <button data-tab="rankings" class="active">Rankings</button>
         <button data-tab="maps">Maps</button>
@@ -255,18 +263,22 @@
             <tr>
               <th class="lft nosort" style="width:54px">#</th>
               <th class="lft" data-sort="name">Player</th>
-              <th data-sort="total_frags">Frags</th>
-              <th data-sort="total_frags_against" class="hide-sm">Deaths</th>
-              <th data-sort="ratio" class="hide-sm">K/D</th>
-              <th data-sort="total_self_kills" class="hide-sm">Self</th>
-              <th data-sort="maps_played" class="hide-sm">Maps</th>
               <th data-sort="elo">Elo</th>
+              <th data-sort="total_frags">Frags</th>
+              <th data-sort="total_deaths" class="hide-sm">Deaths</th>
+              <th data-sort="ratio" class="hide-sm">K/D</th>
+              <th data-sort="maps_played" class="hide-sm">Maps</th>
             </tr>
           </thead>
           <tbody id="rows">
-            <tr><td colspan="8" class="loading"><span class="blink">▌ loading data</span></td></tr>
+            <tr><td colspan="7" class="loading"><span class="blink">▌ loading data</span></td></tr>
           </tbody>
         </table>
+      </div>
+      <div class="nav" style="margin-top:-18px;">
+        <button id="rk-prev">◀ Prev</button>
+        <span class="pos" id="rk-pos"></span>
+        <button id="rk-next">Next ▶</button>
       </div>
     </section>
 
@@ -331,7 +343,7 @@
 
     <footer>
       <span>DATA · live from q2-leagues pipeline</span>
-      <span id="updated"></span>
+      <span></span>
     </footer>
   </div>
 
@@ -341,10 +353,17 @@ const BASE = "https://raw.githubusercontent.com/daniellazaroff-lab/q2-leagues-da
 let players = [], maps = [];
 let playerById = {};
 let curMap = 0;
-let rFilter = "all", rSort = "total_frags", rDir = -1, rQuery = "";
+let rFilter = "all", rSort = "elo", rDir = -1, rQuery = "";
+let rkPage = 0;
+const RK_PAGE = 100;
 
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function ratio(p){ if(p.total_frags_against===0) return p.total_frags>0?p.total_frags:0; return p.total_frags/p.total_frags_against; }
+function ratio(p){
+  const deaths = p.total_frags_against + p.total_self_kills;
+  if(deaths===0) return p.total_frags>0?p.total_frags:0;
+  return p.total_frags/deaths;
+}
+function totalDeaths(p){ return p.total_frags_against + p.total_self_kills; }
 function nameOf(id){ const p=playerById[id]; return p?p.name:("#"+id); }
 function eloOf(id){ const p=playerById[id]; return p?p.elo:null; }
 
@@ -368,50 +387,79 @@ document.getElementById("subtabs").addEventListener("click", e=>{
 
 function passesFilter(p){
   if(p.special==="E") return false;
-  if(p.maps_played===0 && p.total_frags===0) return false;
+  // Maps rule: must have participated in at least 3 frag events
+  const events = p.total_frags + p.total_frags_against + p.total_self_kills;
+  if(events < 3) return false;
   if(rFilter==="humans" && p.is_bot) return false;
   if(rFilter==="bots" && !p.is_bot) return false;
   if(rQuery && !p.name.toLowerCase().includes(rQuery)) return false;
   return true;
 }
-function renderRankings(){
-  const tbody=document.getElementById("rows");
+
+function filteredSorted(){
   let list=players.filter(passesFilter);
   list.sort((a,b)=>{
     let av,bv;
     if(rSort==="ratio"){av=ratio(a);bv=ratio(b);}
     else if(rSort==="name"){av=a.name.toLowerCase();bv=b.name.toLowerCase();}
+    else if(rSort==="total_deaths"){av=totalDeaths(a);bv=totalDeaths(b);}
     else {av=a[rSort];bv=b[rSort];}
     if(av<bv) return -rDir; if(av>bv) return rDir; return 0;
   });
-  document.getElementById("count").textContent=list.length+" player"+(list.length===1?"":"s");
-  if(!list.length){ tbody.innerHTML='<tr><td colspan="8" class="empty">no players match</td></tr>'; return; }
-  tbody.innerHTML=list.map((p,i)=>{
-    const r=ratio(p), rCls=r>=1?"ratio-pos":"ratio-neg";
-    const tag=p.special==="B"?'<span class="tag bot">bot</span>':"";
-    return `<tr>
-      <td class="${i<3?'rank top':'rank'}">${String(i+1).padStart(2,'0')}</td>
-      <td class="lft"><span class="pname">${escapeHtml(p.name)}</span>${tag}</td>
-      <td class="frags">${p.total_frags}</td>
-      <td class="hide-sm">${p.total_frags_against}</td>
-      <td class="hide-sm ${rCls}">${r.toFixed(2)}</td>
-      <td class="hide-sm">${p.total_self_kills}</td>
-      <td class="hide-sm">${p.maps_played}</td>
-      <td class="elo">${p.elo===null?"—":p.elo}</td>
-    </tr>`;
-  }).join("");
+  return list;
 }
+
+function renderRankings(){
+  const tbody=document.getElementById("rows");
+  const list=filteredSorted();
+  const total=list.length;
+  const pages=Math.max(1,Math.ceil(total/RK_PAGE));
+  rkPage=Math.min(rkPage,pages-1);
+  const slice=list.slice(rkPage*RK_PAGE,(rkPage+1)*RK_PAGE);
+  const startRank=rkPage*RK_PAGE;
+
+  document.getElementById("count").textContent=total+" player"+(total===1?"":"s");
+  document.getElementById("rk-pos").textContent=
+    total>RK_PAGE ? `${startRank+1}–${Math.min((rkPage+1)*RK_PAGE,total)} of ${total}` : `${total} players`;
+
+  if(!slice.length){ tbody.innerHTML='<tr><td colspan="7" class="empty">no players match</td></tr>'; }
+  else {
+    tbody.innerHTML=slice.map((p,i)=>{
+      const rank=startRank+i;
+      const r=ratio(p), rCls=r>=1?"ratio-pos":"ratio-neg";
+      const tag=p.special==="B"?'<span class="tag bot">bot</span>':"";
+      const deaths=totalDeaths(p);
+      return `<tr>
+        <td class="${rank<3?'rank top':'rank'}">${String(rank+1).padStart(2,'0')}</td>
+        <td class="lft"><span class="pname">${escapeHtml(p.name)}</span>${tag}</td>
+        <td class="elo">${p.elo===null?"—":p.elo}</td>
+        <td class="frags">${p.total_frags}</td>
+        <td class="hide-sm">${deaths}</td>
+        <td class="hide-sm ${rCls}">${r.toFixed(2)}</td>
+        <td class="hide-sm">${p.maps_played}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  document.getElementById("rk-prev").disabled=(rkPage===0);
+  document.getElementById("rk-next").disabled=(rkPage>=pages-1);
+}
+
+document.getElementById("rk-prev").addEventListener("click",()=>{ if(rkPage>0){rkPage--;renderRankings();} });
+document.getElementById("rk-next").addEventListener("click",()=>{ const pages=Math.ceil(filteredSorted().length/RK_PAGE); if(rkPage<pages-1){rkPage++;renderRankings();} });
+
 document.getElementById("filter").addEventListener("click",e=>{
   if(e.target.tagName!=="BUTTON")return;
-  rFilter=e.target.dataset.f;
+  rFilter=e.target.dataset.f; rkPage=0;
   document.querySelectorAll("#filter button").forEach(b=>b.classList.remove("active"));
   e.target.classList.add("active"); renderRankings();
 });
-document.getElementById("search").addEventListener("input",e=>{ rQuery=e.target.value.toLowerCase().trim(); renderRankings(); });
+document.getElementById("search").addEventListener("input",e=>{ rQuery=e.target.value.toLowerCase().trim(); rkPage=0; renderRankings(); });
 document.querySelectorAll("#tab-rankings th[data-sort]").forEach(th=>{
   th.addEventListener("click",()=>{
     const k=th.dataset.sort;
     if(rSort===k) rDir*=-1; else { rSort=k; rDir=(k==="name")?1:-1; }
+    rkPage=0;
     document.querySelectorAll("#tab-rankings th .arr").forEach(a=>a.remove());
     const arr=document.createElement("span"); arr.className="arr"; arr.textContent=rDir===-1?"▼":"▲"; th.appendChild(arr);
     renderRankings();
@@ -426,8 +474,7 @@ function renderMapDetail(){
   const pl=[...m.players].sort((a,b)=>b.frags-a.frags);
   document.getElementById("md-rows").innerHTML = pl.map((pp,i)=>{
     const nm=nameOf(pp.player_id);
-    let tag="";
-    if(pp.special==="B") tag='<span class="tag bot">bot</span>';
+    const tag=pp.special==="B"?'<span class="tag bot">bot</span>':"";
     const elo=eloOf(pp.player_id);
     const eloStr=elo===null?"—":elo;
     return `<tr>
@@ -484,17 +531,42 @@ function renderMapList(){
 
 Promise.all([
   fetch(BASE+"players.json").then(r=>{if(!r.ok)throw new Error("players "+r.status);return r.json();}),
-  fetch(BASE+"maps.json").then(r=>{if(!r.ok)throw new Error("maps "+r.status);return r.json();})
-]).then(([pdata,mdata])=>{
+  fetch(BASE+"maps.json").then(r=>{if(!r.ok)throw new Error("maps "+r.status);return r.json();}),
+  fetch(BASE+"heartbeat.txt?_="+Date.now()).then(r=>r.ok?r.text():null).catch(()=>null)
+]).then(([pdata,mdata,hbeat])=>{
   players=pdata; maps=mdata;
   playerById={}; players.forEach(p=>playerById[p.id]=p);
   curMap=maps.length-1;
   renderRankings();
   renderMapDetail();
   renderMapList();
-  document.getElementById("updated").textContent="loaded "+new Date().toLocaleString();
+
+  // Last update — from the most recent completed map
+  if(maps.length){
+    const last=maps[maps.length-1];
+    const dt=new Date(last.date+"T"+last.time_end.replace(/(\d{2}):(\d{2})/,"$1:$2")+":00");
+    const fmt=dt.toLocaleDateString("en-CA",{month:"2-digit",day:"2-digit",year:"numeric"})
+              +" "+dt.toLocaleTimeString("en-CA",{hour:"2-digit",minute:"2-digit",hour12:false});
+    document.getElementById("last-update").textContent=fmt;
+  }
+
+  // Server status — parse heartbeat timestamp, green if within 10 min
+  const dot=document.getElementById("status-dot");
+  const lbl=document.getElementById("status-label");
+  if(hbeat){
+    // heartbeat.txt contains an ISO timestamp written by the upload script
+    const ts=new Date(hbeat.trim());
+    const ageMin=(Date.now()-ts.getTime())/60000;
+    if(!isNaN(ts) && ageMin<=10){
+      dot.className="status-dot online"; lbl.textContent="server online";
+    } else {
+      dot.className="status-dot offline"; lbl.textContent="server offline";
+    }
+  } else {
+    dot.className="status-dot offline"; lbl.textContent="server offline";
+  }
 }).catch(err=>{
-  document.getElementById("rows").innerHTML='<tr><td colspan="8" class="empty">failed to load — '+err.message+'</td></tr>';
+  document.getElementById("rows").innerHTML='<tr><td colspan="7" class="empty">failed to load — '+err.message+'</td></tr>';
 });
 </script>
 </body>
