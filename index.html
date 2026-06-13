@@ -476,15 +476,19 @@ function renderMapDetail(){
   document.getElementById("md-rows").innerHTML = pl.map((pp,i)=>{
     const nm=nameOf(pp.player_id);
     const tag=pp.special==="B"?'<span class="tag bot">bot</span>':"";
-    const elo=eloOf(pp.player_id);
-    const eloStr=fmtElo(elo);
+    const eloBefore = pp.elo_before != null ? Number(pp.elo_before).toFixed(2) : "—";
+    const eloAfter  = pp.elo_after  != null ? Number(pp.elo_after).toFixed(2)  : "—";
+    const eloDiff   = (pp.elo_before != null && pp.elo_after != null)
+                      ? Number(pp.elo_after - pp.elo_before).toFixed(2) : "";
+    const diffCls   = eloDiff > 0 ? "ratio-pos" : eloDiff < 0 ? "ratio-neg" : "";
+    const diffStr   = eloDiff !== "" ? ` <span class="${diffCls}">(${eloDiff > 0 ? "+":""}${eloDiff})</span>` : "";
     return `<tr>
       <td class="${i<3?'rank top':'rank'}">${String(i+1).padStart(2,'0')}</td>
       <td class="lft"><span class="pname">${escapeHtml(nm)}</span>${tag}</td>
       <td class="frags">${pp.frags}</td>
       <td class="hide-sm">${pp.frags_against}</td>
-      <td class="elo">${eloStr}</td>
-      <td class="elo">${eloStr}</td>
+      <td class="elo">${eloBefore}</td>
+      <td class="elo">${eloAfter}${diffStr}</td>
     </tr>`;
   }).join("");
   const pos = `MAP ${curMap+1} OF ${maps.length}`;
