@@ -366,6 +366,7 @@ function ratio(p){
 function totalDeaths(p){ return p.total_frags_against + p.total_self_kills; }
 function nameOf(id){ const p=playerById[id]; return p?p.name:("#"+id); }
 function eloOf(id){ const p=playerById[id]; return p?p.elo:null; }
+function fmtElo(v){ return v===null?"—":Number(v).toFixed(2); }
 
 document.getElementById("maintabs").addEventListener("click", e=>{
   if(e.target.tagName!=="BUTTON") return;
@@ -432,7 +433,7 @@ function renderRankings(){
       return `<tr>
         <td class="${rank<3?'rank top':'rank'}">${String(rank+1).padStart(2,'0')}</td>
         <td class="lft"><span class="pname">${escapeHtml(p.name)}</span>${tag}</td>
-        <td class="elo">${p.elo===null?"—":p.elo}</td>
+        <td class="elo">${fmtElo(p.elo)}</td>
         <td class="frags">${p.total_frags}</td>
         <td class="hide-sm">${deaths}</td>
         <td class="hide-sm ${rCls}">${r.toFixed(2)}</td>
@@ -476,7 +477,7 @@ function renderMapDetail(){
     const nm=nameOf(pp.player_id);
     const tag=pp.special==="B"?'<span class="tag bot">bot</span>':"";
     const elo=eloOf(pp.player_id);
-    const eloStr=elo===null?"—":elo;
+    const eloStr=fmtElo(elo);
     return `<tr>
       <td class="${i<3?'rank top':'rank'}">${String(i+1).padStart(2,'0')}</td>
       <td class="lft"><span class="pname">${escapeHtml(nm)}</span>${tag}</td>
